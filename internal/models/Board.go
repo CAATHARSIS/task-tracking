@@ -13,8 +13,8 @@ type Board struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-// Отношение: одна доска Board соответствует множеству задач Task
+// Отношение многие ко многим
 type BoardTask struct {
 	BoardID int `json:"board_id"`
-	TaskID int `json:"task_id"`
+	TaskID  int `json:"task_id"` 
 }

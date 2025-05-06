@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS board_tasks (
+    board_id INTEGER NOT NULL REFERENCES boards(id) ON DELETE CASCADE,
+    task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE,
+    PRIMARY KEY (board_id, task_id)
+);

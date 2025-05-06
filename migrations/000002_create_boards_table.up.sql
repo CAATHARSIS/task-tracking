@@ -1,0 +1,9 @@
+CREATE TABLE IF NOT EXISTS boards (
+    id SERIAL PRIMARY KEY,
+    name CHARACTER VARYING(50) NOT NULL,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT board_name_min_length CHECK (length(name) >= 3)
+);
+
+CREATE INDEX IF NOT EXISTS idx_boards_user_id ON boards(user_id);
