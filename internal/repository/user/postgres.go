@@ -12,7 +12,7 @@ type UserPostgrtesRepo struct {
 	db *sql.DB
 }
 
-func NewPostgresRepository(db *sql.DB) *UserPostgrtesRepo {
+func NewUserPostgresRepo(db *sql.DB) *UserPostgrtesRepo {
 	return &UserPostgrtesRepo{db: db}
 }
 

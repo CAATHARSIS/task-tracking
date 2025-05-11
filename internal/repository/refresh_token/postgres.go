@@ -14,7 +14,7 @@ type RefreshTokenPostgresRepo struct {
 	db *sql.DB
 }
 
-func NewPostgresRepository(db *sql.DB) *RefreshTokenPostgresRepo {
+func NewRefreshTokenPostgresRepo(db *sql.DB) *RefreshTokenPostgresRepo {
 	return &RefreshTokenPostgresRepo{db: db}
 }
 

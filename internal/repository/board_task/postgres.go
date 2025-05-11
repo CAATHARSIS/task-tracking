@@ -6,7 +6,7 @@ type BoardTaskPostgresRepo struct {
 	db *sql.DB
 }
 
-func NewPostgresRepository(db *sql.DB) *BoardTaskPostgresRepo {
+func NewBoardTaskPostgresRepo(db *sql.DB) *BoardTaskPostgresRepo {
 	return &BoardTaskPostgresRepo{db: db}
 }
 

@@ -12,7 +12,7 @@ type BoardPostgresRepo struct {
 	db *sql.DB
 }
 
-func NewPostgresRepository(db *sql.DB) *BoardPostgresRepo {
+func NewBoardPostgresRepo(db *sql.DB) *BoardPostgresRepo {
 	return &BoardPostgresRepo{db: db}
 }
 
