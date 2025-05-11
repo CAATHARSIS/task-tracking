@@ -1,4 +1,4 @@
-module task-tracking
+module github.com/CAATHARSIS/task-tracking
 
 go 1.24.0
 

@@ -1,0 +1,1 @@
+ALTER TABLE boards DROP COULUMN updated_at;
