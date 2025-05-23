@@ -1,4 +1,4 @@
-package refresh_token
+package refresh_token_repo
 
 import (
 	"crypto/sha256"
@@ -43,8 +43,8 @@ func (r *RefreshTokenPostgresRepo) Create(token *models.RefreshToken) error {
 func (r *RefreshTokenPostgresRepo) GetByHash(tokenHash string) (*models.RefreshToken, error) {
 	query := `
 		SELECT token_hash, user_id, expires_at, created_at
-		FROM refresh_token
-		WHERE token_hash = $1 AND expires_at > NOW
+		FROM refresh_tokens
+		WHERE token_hash = $1 AND expires_at > NOW()
 	`
 
 	refreshToken := &models.RefreshToken{}

@@ -1,4 +1,4 @@
-package user
+package user_repo
 
 import (
 	"database/sql"
@@ -91,11 +91,11 @@ func (r *UserPostgrtesRepo) GetByEmail(email string) (*models.User, error) {
 
 func (r *UserPostgrtesRepo) Update(user *models.User) error {
 	query := `
-		UPDATE users
-		SET email = $1
-			password_hash = $2
-		WHERE id = $3
-	`
+        UPDATE users
+        SET email = COALESCE(NULLIF($1, ''), email),
+            password_hash = COALESCE(NULLIF($2, ''), password_hash)
+        WHERE id = $3
+    `
 
 	_, err := r.db.Exec(
 		query,

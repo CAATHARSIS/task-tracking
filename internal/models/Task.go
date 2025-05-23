@@ -21,8 +21,28 @@ type Task struct {
 	ID          int        `json:"id"`
 	Title       string     `json:"title" validate:"required,min=3,max=100"`
 	Description string     `json:"description,omitempty" validate:"max=500"`
-	Status      TaskStatus `json:"staus" validate:"oneof=todo in_progress done"`
-	User_id     int        `json:"user_id"`
+	Status      TaskStatus `json:"status" validate:"oneof=todo in_progress done"`
+	UserID      int        `json:"user_id" validate:"required"`
 	CreatedAt   time.Time  `json:"created_at"`
 	UpdatedAt   time.Time  `json:"updated_at"`
+}
+
+type TaskStatusUpdate struct {
+	Status TaskStatus `json:"status" validate:"required,oneof=todo in_progress done"`
+}
+
+type TaskCreateRequest struct {
+	Title       string     `json:"title" validate:"required,min=3,max=100"`
+	Description string     `json:"description,omitempty" validate:"max=500"`
+	Status      TaskStatus `json:"status" validate:"oneof=todo in_progress done"`
+	UserID      int        `json:"user_id" validate:"required"`
+}
+
+func (s TaskStatus) IsValid() bool {
+	switch s {
+	case StatusToDo, StatusInProgres, StatusDone:
+		return true
+	default:
+		return false
+	}
 }

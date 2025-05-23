@@ -19,3 +19,7 @@ type BoardTask struct {
 	BoardID int `json:"board_id"`
 	TaskID  int `json:"task_id"`
 }
+
+type BoardRequest struct {
+	Name       string    `json:"name" validate:"required,min=3,max=50"`
+}

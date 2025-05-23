@@ -1,4 +1,4 @@
-package board_task
+package board_task_repo
 
 import "database/sql"
 

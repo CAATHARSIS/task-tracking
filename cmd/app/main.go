@@ -3,7 +3,16 @@ package main
 import (
 	"log"
 
+	"github.com/CAATHARSIS/task-tracking/internal/auth"
 	"github.com/CAATHARSIS/task-tracking/internal/config"
+	"github.com/CAATHARSIS/task-tracking/internal/handlers/board"
+	"github.com/CAATHARSIS/task-tracking/internal/handlers/task"
+	"github.com/CAATHARSIS/task-tracking/internal/handlers/user"
+	board_repo "github.com/CAATHARSIS/task-tracking/internal/repository/board"
+	board_task_repo "github.com/CAATHARSIS/task-tracking/internal/repository/board_task"
+	task_repo "github.com/CAATHARSIS/task-tracking/internal/repository/task"
+	user_repo "github.com/CAATHARSIS/task-tracking/internal/repository/user"
+	"github.com/CAATHARSIS/task-tracking/internal/router"
 	"github.com/CAATHARSIS/task-tracking/pkg/database"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
@@ -22,9 +31,25 @@ func main() {
 	}
 	defer db.Close()
 
-	var version string
-	if err := db.QueryRow("SELECT version();").Scan(&version); err != nil {
-		log.Fatalf("PosgrteSQL version check failed: %v", version)
-	}
-	log.Printf("PostgreSQL connected! Version: %s", version)
+	jwtService := auth.NewJWTService(cfg)
+
+	boardRepo := board_repo.NewBoardPostgresRepo(db)
+	boardTaskRepo := board_task_repo.NewBoardTaskPostgresRepo(db)
+	taskRepo := task_repo.NewTaskPostgresRepo(db)
+	userRepo := user_repo.NewUserPostgresRepo(db)
+
+	boardHandler := board.NewBoardHandler(boardRepo)
+	boardTaskHandler := board.NewBoardTaskRealtionHandler(boardTaskRepo)
+	taskHandler := task.NewTaskHandler(taskRepo)
+	userHandler := user.NewUserHandler(userRepo)
+
+	r := router.SetupRouter(
+		boardHandler,
+		boardTaskHandler,
+		taskHandler,
+		userHandler,
+		jwtService,
+	)
+
+	r.Run(":" + cfg.AppPort)
 }

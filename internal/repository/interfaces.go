@@ -21,9 +21,9 @@ type UserRepository interface {
 type BoardRepository interface {
 	Create(board *models.Board) error
 	GetById(id int) (*models.Board, error)
-	GetByUser(userID int) (*models.Board, error)
 	Update(*models.Board) error
-	Delete(id int) error	
+	Delete(id int) error
+	ListByUser(userID int) ([]*models.Board, error)
 }
 
 type RefreshTokenRepository interface {

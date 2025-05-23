@@ -1,4 +1,4 @@
-package task
+package task_repo
 
 import (
 	"database/sql"
@@ -28,7 +28,7 @@ func (r *TaskPostgresRepo) Create(task *models.Task) error {
 		task.Title,
 		task.Description,
 		task.Status,
-		task.User_id,
+		task.UserID,
 		now,
 		now,
 	).Scan(&task.ID)
@@ -52,9 +52,10 @@ func (r *TaskPostgresRepo) GetById(id int) (*models.Task, error) {
 	task := &models.Task{}
 	err := row.Scan(
 		&task.ID,
+		&task.Title,
 		&task.Description,
 		&task.Status,
-		&task.User_id,
+		&task.UserID,
 		&task.CreatedAt,
 		&task.UpdatedAt,
 	)
@@ -73,9 +74,9 @@ func (r *TaskPostgresRepo) GetById(id int) (*models.Task, error) {
 func (r *TaskPostgresRepo) Update(task *models.Task) error {
 	query := `
 		UPDATE tasks
-		SET title = $1
-			description = $2
-			status = $3
+		SET title = $1,
+			description = $2,
+			status = $3,
 			updated_at = $4
 		WHERE id = $5
 	`
@@ -120,7 +121,7 @@ func (r *TaskPostgresRepo) ListByUser(userID int) ([]*models.Task, error) {
 			&task.Title,
 			&task.Description,
 			&task.Status,
-			&task.User_id,
+			&task.UserID,
 			&task.CreatedAt,
 			&task.UpdatedAt,
 		)
