@@ -1,0 +1,27 @@
+{{ define "boards-view"}}
+    <h1>{{ .Board.Name }}</h1>
+
+    <div class="board-actions">
+        <a href="/boards/{{ .Board.ID }}/edit" class="btn">Редактировать</a>
+        <form action="/api/boards/{{ .BoardID }}" method="POST" class="inline-form">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" class="btn btn-delete">Удалить</button>
+        </form>
+    </div>
+
+    <h2>Задачи</h2>
+    <div class="tasks-list">
+        {{ range .Tasks }}
+            <div class="task-card">
+                <h3>{{ .Title }}</h3>
+                <p>{{ .Descriptioin }}</p>
+                <span class="status status-{{ .Status }}">{{ .Status }}</span>
+                <a href="/tasks/{{ .ID }}" class="btn">Подробнее</a>
+            </div>
+        {{ else }}
+            <p>Нет задач в этой доске</p>
+        {{ end }}
+    </div>
+{{ end }}
+
+{{ template "base" . }}

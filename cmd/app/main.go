@@ -38,10 +38,10 @@ func main() {
 	taskRepo := task_repo.NewTaskPostgresRepo(db)
 	userRepo := user_repo.NewUserPostgresRepo(db)
 
-	boardHandler := board.NewBoardHandler(boardRepo)
+	boardHandler := board.NewBoardHandler(boardRepo, boardTaskRepo, taskRepo)
 	boardTaskHandler := board.NewBoardTaskRealtionHandler(boardTaskRepo)
 	taskHandler := task.NewTaskHandler(taskRepo)
-	userHandler := user.NewUserHandler(userRepo)
+	userHandler := user.NewUserHandler(userRepo, taskRepo)
 
 	r := router.SetupRouter(
 		boardHandler,

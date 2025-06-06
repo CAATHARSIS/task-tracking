@@ -9,25 +9,39 @@ import (
 
 func (s *JWTService) JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Autorization header required"})
+		// Пропускаем статические файлы и API
+		if strings.HasPrefix(c.Request.URL.Path, "/static") ||
+			strings.HasPrefix(c.Request.URL.Path, "/api") {
+			c.Next()
 			return
 		}
 
-		tokenParts := strings.Split(authHeader, " ")
-		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid authorization format"})
-			return
+		// Публичные маршруты
+		publicRoutes := []string{"/", "/login", "/register"}
+		for _, route := range publicRoutes {
+			if c.Request.URL.Path == route {
+				c.Next()
+				return
+			}
 		}
 
-		claims, err := s.ParseToken(tokenParts[1])
+		token, err := c.Cookie("auth_token")
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+			c.Redirect(http.StatusFound, "/login")
+			c.Abort()
 			return
 		}
-		
+
+		claims, err := s.ParseToken(token)
+		if err != nil {
+			c.SetCookie("auth_token", "", -1, "/", "", false, true)
+			c.Redirect(http.StatusFound, "/login")
+			c.Abort()
+			return
+		}
+
 		c.Set("user_id", claims.UserID)
+		c.Set("IsAuthenticated", true)
 		c.Next()
 	}
 }

@@ -1,0 +1,59 @@
+{{ define "base" }}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Tracker</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <nav>
+                <a href="/" class="logo">Task Tracker</a>
+                <div class="nav-links">
+                    {{ if .IsAuthenticated }}
+                    <a href="/tasks" class="nav-link">Мои задачи</a>
+                    <a href="/boards" class="nav-link">Мои доски</a>
+                    <a href="/" class="nav-link">Выйти</a>
+                    {{ else }}
+                    <a href="/" class="nav-link">Главная</a>
+                    <a href="/login" class="nav-link">Войти</a>
+                    <a href="/register" class="nav-link">Регистрация</a>
+                    {{ end }}
+                </div>
+            </nav>
+        </div>
+    </header>
+    <main>
+        <div class="container">
+            {{ if eq .TemplateName "home" }}
+                {{ template "home" . }}
+            {{ else if eq .TemplateName "login" }}
+                {{ template "login" . }}
+            {{ else if eq .TemplateName "register" }}
+                {{ template "register" . }}
+            {{ else if eq .TemplateName "boards-form" }}
+                {{ template "boards-form" . }}
+            {{ else if eq .TemplateName "boards-list" }}
+                {{ template "boards-list" . }}
+            {{ else if eq .TemplateName "boards-view" }}
+                {{ template "boards-view" . }}
+            {{ else if eq .TemplateName "tasks-form" }}
+                {{ template "tasks-form" . }}
+            {{ else if eq .TemplateName "tasks-list" }}
+                {{ template "tasks-list" . }}
+            {{ else if eq .TemplateName "tasks-view" }}
+                {{ template "tasks-view" . }}
+            {{ end }}
+        </div>
+    </main>
+    <footer>
+        <div class="container">
+
+        </div>
+    </footer>
+</body>
+</html>
+{{ end }}

@@ -1,0 +1,48 @@
+{{ define "tasks-list" }}
+    <div class="task-list-container">
+        <h1> Мои задачи</h1>
+        <a href="/tasks/new" class="btn">Создать задачу</a>
+
+        <div class="task-filters">
+            <a href="/tasks?status=all" class="btn btn-filter">Все</a>
+            <a href="/tasks?status=todo" class="btn btn-filter">ToDo</a>
+            <a href="/tasks?status=in_progress" class="btn btn-filter">In Progress</a>
+            <a href="/tasks?status=done" class="btn btn-filter">Done</a>
+        </div>
+        
+        <div class="tasks-column">
+            {{ range .Tasks }}
+            <div class="task-card">
+                <div class="task-header">
+                    <h3>{{ .Title }}</h3>
+                    <span class="status status-{{ .Status }}">{{ .Status }}</span>
+                </div>
+                
+                <div class="task-body">
+                    <p>{{ .Description }}</p>
+                </div>
+                
+                <div class="task-footer">
+                    <div class="task-meta">
+                        <span>Создано: {{ .CreatedAt.Format "02.01.2006" }}</span>
+                    </div>
+                    
+                    <div class="task-actions">
+                        <a href="/tasks/{{ .ID }}/edit" class="btn btn-edit">Редактировать</a>
+                        <form action="/api/tasks/{{ .ID }}" method="POST" class="inline-form">
+                            <input type="hidden" name="_method" value="DELETE">
+                            <button type="submit" class="btn btn-delete">Удалить</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {{ else }}
+            <div class="no-tasks">
+                <p>Нет задач. <a href="/tasks/new">Создать первую?</a></p>
+            </div>
+            {{ end }}
+        </div>
+    </div>
+{{ end }}
+
+{{ template "base" . }}

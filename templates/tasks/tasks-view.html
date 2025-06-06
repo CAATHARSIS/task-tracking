@@ -1,0 +1,31 @@
+{{ define "tasks-view" }}
+    <h1>{{ .Task.Title }}</h1>
+
+    <div class="task-meta">
+        <span class="status status-{{ .Task.Status }}">{{ .Task.Status }}</span>
+        <span class="task-date">Создано: {{ .Task.CreatedAT.Format "02.01.2006 15:04" }}</span>
+        {{ if .Task.CreatedAt .Task.UpdatedAt }}
+            <span class="task-date">Обновлено: {{ .Task.UpdatedAt.Format "02.01.2006 15:04" }}</span>
+        {{ end }}
+    </div>
+
+    <div class="task-desscription">
+        <h3>Опсиание</h3>
+        {{ if .Task.Decription }}
+            <p>{{ .Task.Description }}</p>
+        {{ else }}
+            <p class="text-muted">Описание отсутствует</p>
+        {{ end }}
+    </div>
+
+    <div class="task-actions">
+        <a href="/tasks/{{ .Task.ID }}/edit" class="btn btn-edit">Редактировать</a>
+        <form action="/api/tasks/{{ .Task.ID }}" method="POST" class="inline-form">
+            <input type="hidden" name="_method" value="DELETE">
+            <button type="submit" class="btn btn-delete">Удалить</button>
+        </form>
+        <a href="/tasks" class="btn">К списку задач</a>
+    </div>
+{{ end }}
+
+{{ template "base" . }}

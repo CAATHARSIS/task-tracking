@@ -19,47 +19,102 @@ func SetupRouter(
 ) *gin.Engine {
 	r := gin.Default()
 
+	r.LoadHTMLFiles(
+		"templates/home.html",
+		"templates/base.html",
+		"templates/auth/login.html",
+		"templates/auth/register.html",
+		"templates/boards/boards-form.html",
+		"templates/boards/boards-list.html",
+		"templates/boards/boards-view.html",
+		"templates/tasks/tasks-form.html",
+		"templates/tasks/tasks-list.html",
+		"templates/tasks/tasks-view.html",
+	)
+	r.Static("/static", "./static")
+
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "home.html", gin.H{
+			"TemplateName": "home",
+		})
+	})
+	r.GET("/login", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "login.html", gin.H{
+			"TemplateName": "login",
+		})
+	})
+	r.GET("/register", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "register.html", gin.H{
+			"TemplateName": "register",
+		})
+	})
+
 	api := r.Group("/api")
 	{
-		authGroup := api.Group("/auth")
+		authAPI := api.Group("/auth")
 		{
-			authGroup.POST("/register", userHandler.Register)
-			authGroup.POST("/login", userHandler.Login)
+			authAPI.POST("/register", userHandler.Register)
+			authAPI.POST("/login", userHandler.Login)
 		}
 
-		protected := api.Group("")
-		protected.Use(jwtService.JWTAuthMiddleware())
+		apiProtected := api.Group("")
+		apiProtected.Use(jwtService.JWTAuthMiddleware())
 		{
-			userGroup := protected.Group("/users")
+			userAPI := apiProtected.Group("/users")
 			{
-				userGroup.GET("/:id", userHandler.GetUser)
-				userGroup.PUT("/:id", userHandler.UpdateUser)
-				userGroup.DELETE("/:id", userHandler.DeleteUser)
+				userAPI.GET("/:id", userHandler.GetUser)
+				userAPI.PUT("/:id", userHandler.UpdateUser)
+				userAPI.DELETE("/:id", userHandler.DeleteUser)
 			}
 
-			boardGroup := protected.Group("/boards")
+			boardAPI := apiProtected.Group("/boards")
 			{
-				boardGroup.POST("", boardHandler.CreateBoard)
-				boardGroup.GET("/:id", boardHandler.GetBoard)
-				boardGroup.PUT("/:id", boardHandler.UpdateBoard)
-				boardGroup.DELETE("/:id", boardHandler.DeleteBoard)
-				boardGroup.GET("/:id/user-tasks", boardHandler.ListBoardByUser)
+				boardAPI.POST("", boardHandler.CreateBoard)
+				boardAPI.GET("/:id", boardHandler.GetBoard)
+				boardAPI.PUT("/:id", boardHandler.UpdateBoard)
+				boardAPI.DELETE("/:id", boardHandler.DeleteBoard)
+				boardAPI.GET("/:id/user-tasks", boardHandler.ListBoardByUser)
 
-				boardGroup.POST("/:id/tasks/:task_id", boardTaskHandler.AddTaskToBoard)
-				boardGroup.DELETE("/:id/tasks/:task_id", boardTaskHandler.RemoveTaskFromBoard)
-				boardGroup.GET("/:id/tasks", boardTaskHandler.GetBoardTasks)
-				boardGroup.PATCH("/tasks/move", boardTaskHandler.MoveTasksBeetwenBoards)
+				boardAPI.POST("/:id/tasks/:task_id", boardTaskHandler.AddTaskToBoard)
+				boardAPI.DELETE("/:id/tasks/:task_id", boardTaskHandler.RemoveTaskFromBoard)
+				boardAPI.GET("/:id/tasks", boardTaskHandler.GetBoardTasks)
+				boardAPI.PATCH("/tasks/move", boardTaskHandler.MoveTasksBeetwenBoards)
 			}
 
-			taskGroup := protected.Group("/tasks")
+			taskAPI := apiProtected.Group("/tasks")
 			{
-				taskGroup.POST("", taskHandler.CreateTask)
-				taskGroup.GET("/:id", taskHandler.GetTask)
-				taskGroup.PATCH("/:id/status", taskHandler.UpdateStatus)
-				taskGroup.PUT("/:id", taskHandler.UpdateTask)
-				taskGroup.DELETE("/:id", taskHandler.DeleteTask)
-				// taskGroup.GET("/:id/tasks", taskHandler.ListTaskByUser)
+				taskAPI.POST("", taskHandler.CreateTask)
+				taskAPI.GET("/:id", taskHandler.GetTask)
+				taskAPI.PATCH("/:id/status", taskHandler.UpdateStatus)
+				taskAPI.PUT("/:id", taskHandler.UpdateTask)
+				taskAPI.DELETE("/:id", taskHandler.DeleteTask)
+				taskAPI.GET("/user/:user_id", taskHandler.ListTaskByUser)
 			}
+		}
+	}
+
+	web := r.Group("")
+	{
+		web.POST("/login", userHandler.LoginWeb)
+		web.POST("/register", userHandler.RegisterWeb)
+
+		webProtected := web.Group("")
+		webProtected.Use(jwtService.JWTAuthMiddleware())
+		{
+			webProtected.GET("/boards", boardHandler.ListBoardsPage)
+			webProtected.GET("/boards/new", boardHandler.HandleBoardForm)
+			webProtected.GET("/boards/:id", boardHandler.GetBoardPage)
+			webProtected.GET("/boards/:id/edit", boardHandler.HandleBoardForm)
+			webProtected.POST("/boards", boardHandler.HandleBoardForm)
+			webProtected.POST("/boards/:id", boardHandler.HandleBoardForm)
+
+			webProtected.GET("/tasks", taskHandler.ListTasksPage)
+			webProtected.GET("/tasks/new", taskHandler.HandleTaskForm)
+			webProtected.GET("/tasks/:id", taskHandler.GetTaskPage)
+			webProtected.GET("/tasks/:id/edit", taskHandler.HandleTaskForm)
+			webProtected.POST("/tasks", taskHandler.HandleTaskForm)
+			webProtected.POST("/tasks:id", taskHandler.HandleTaskForm)
+			webProtected.PATCH("/tasks/:id/status", taskHandler.UpdateStatus)
 		}
 	}
 

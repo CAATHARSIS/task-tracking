@@ -1,0 +1,12 @@
+{{ define "boards-form" }}
+    <h1>{{ if .IsNew }}Редактирование{{ else }}Создание{{ end }} доски</h1>
+    <form method="POST" action="{{ if .IsNew }}/boards{{ else }}/boards{{ .Board.ID }}{{ end }}">
+        <div class="form-group">
+            <label for="name">Название доски</label>
+            <input type="text" id="name" name="name" value="{{ if not .IsNew }}{{ .Board.Name }}{{ end }}" required minlength="3" maxlength="50">
+        </div>
+        <button type="submit" class="btn">Сохранить</button>
+    </form>
+{{ end }}
+
+{{ template "base" . }}

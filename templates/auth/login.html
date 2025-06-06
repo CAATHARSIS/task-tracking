@@ -1,0 +1,16 @@
+{{ define "login" }}
+            <h1>Вход</h1>
+            <form action="/login" method="POST" autocomplete="on">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" name="email" placeholder="Email" autocomplete="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">Пароль</label>
+                    <input type="password" name="password" placeholder="password" autocomplete="current-password" required>
+                </div>
+                <button type="submit" class="btn">Войти</button>
+            </form>
+{{ end }}
+
+{{ template "base" . }}

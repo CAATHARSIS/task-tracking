@@ -137,3 +137,38 @@ func (r *TaskPostgresRepo) ListByUser(userID int) ([]*models.Task, error) {
 
 	return tasks, nil
 }
+
+func (r *TaskPostgresRepo) ListByUserAndStatus(userID int, status models.TaskStatus) ([]*models.Task, error) {
+	query := `
+		SELECT id, title, description, status, user_id, created_at, updated_at
+		FROM tasks
+		WHERE user_id = $1 AND status = $2
+	`
+
+	rows, err := r.db.Query(query, userID, status)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var tasks []*models.Task
+	for rows.Next() {
+		task := &models.Task{}
+		err := rows.Scan(
+			&task.ID,
+			&task.Title,
+			&task.Description,
+			&task.Status,
+			&task.UserID,
+			&task.CreatedAt,
+			&task.CreatedAt,
+			&task.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, task)
+	}
+
+	return tasks, nil
+}
