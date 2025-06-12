@@ -1,4 +1,4 @@
-package board
+package api
 
 import (
 	"net/http"

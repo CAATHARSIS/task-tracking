@@ -46,6 +46,7 @@
                 {{ template "tasks-list" . }}
             {{ else if eq .TemplateName "tasks-view" }}
                 {{ template "tasks-view" . }}
+            {{ else if eq .TemplateName "error"}}
             {{ end }}
         </div>
     </main>

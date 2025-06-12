@@ -1,14 +1,16 @@
 {{ define "boards-list" }}
     <h1>Мои доски</h1>
     <a href="boards/new" class="btn">Создать доску</a>
-    <div class="boards-grid">
+    <div class="board-column">
         {{ range .Boards }}
             <div class="board-card">
                 <h3> {{ .Name }} </h3>
-                <a href="/boards/{{ .ID }}" class="btn">Открыть</a>
-                <form action="/boards/{{ .ID }}/delete" method="POST" class="inline-form">
-                    <button type="submit" class="btn btn-delete">Удалить</button>
-                </form>
+                <div class="actions">
+                    <a href="/boards/{{ .ID }}" class="btn">Открыть</a>
+                    <form action="/boards/{{ .ID }}/delete" method="POST" class="inline-form">
+                        <button type="submit" class="btn btn-delete">Удалить</button>
+                    </form>
+                </div>
             </div>
         {{ else }}
             <p>Нет досок</p>

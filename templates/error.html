@@ -1,19 +1,11 @@
 {{ define "error" }}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ошибка</title>
-</head>
-<body>
     <div class="container">
-        <h1>Произошла Ошибка</h1>
+        <h1>Ошибка</h1>
         <div class="alert alert-error">
             {{ .error }}
         </div>
         <a href="javascript:history.back()" class="btn">Назад</a>
     </div>
-</body>
-</html>
 {{ end }}
+
+{{ template "base" . }}

@@ -4,17 +4,19 @@ import (
 	"net/http"
 
 	"github.com/CAATHARSIS/task-tracking/internal/auth"
-	"github.com/CAATHARSIS/task-tracking/internal/handlers/board"
-	"github.com/CAATHARSIS/task-tracking/internal/handlers/task"
-	"github.com/CAATHARSIS/task-tracking/internal/handlers/user"
+	"github.com/CAATHARSIS/task-tracking/internal/handlers/api"
+	"github.com/CAATHARSIS/task-tracking/internal/handlers/web"
 	"github.com/gin-gonic/gin"
 )
 
 func SetupRouter(
-	boardHandler *board.BoardHandler,
-	boardTaskHandler *board.BoardTaskRelationHandler,
-	taskHandler *task.TaskHandler,
-	userHandler *user.UserHandler,
+	apiBoardHandler *api.BoardHandler,
+	webBoardHandler *web.BoardHandler,
+	apiBoardTaskHandler *api.BoardTaskRelationHandler,
+	apiTaskHandler *api.TaskHandler,
+	webTaskHandler *web.TaskHandler,
+	apiUserHandler *api.UserHandler,
+	webUserHandler *web.UserHandler,
 	jwtService *auth.JWTService,
 ) *gin.Engine {
 	r := gin.Default()
@@ -22,6 +24,7 @@ func SetupRouter(
 	r.LoadHTMLFiles(
 		"templates/home.html",
 		"templates/base.html",
+		"templates/error.html",
 		"templates/auth/login.html",
 		"templates/auth/register.html",
 		"templates/boards/boards-form.html",
@@ -53,8 +56,8 @@ func SetupRouter(
 	{
 		authAPI := api.Group("/auth")
 		{
-			authAPI.POST("/register", userHandler.Register)
-			authAPI.POST("/login", userHandler.Login)
+			authAPI.POST("/register", apiUserHandler.Register)
+			authAPI.POST("/login", apiUserHandler.Login)
 		}
 
 		apiProtected := api.Group("")
@@ -62,59 +65,71 @@ func SetupRouter(
 		{
 			userAPI := apiProtected.Group("/users")
 			{
-				userAPI.GET("/:id", userHandler.GetUser)
-				userAPI.PUT("/:id", userHandler.UpdateUser)
-				userAPI.DELETE("/:id", userHandler.DeleteUser)
+				userAPI.GET("/:id", apiUserHandler.GetUser)
+				userAPI.PUT("/:id", apiUserHandler.UpdateUser)
+				userAPI.DELETE("/:id", apiUserHandler.DeleteUser)
 			}
 
 			boardAPI := apiProtected.Group("/boards")
 			{
-				boardAPI.POST("", boardHandler.CreateBoard)
-				boardAPI.GET("/:id", boardHandler.GetBoard)
-				boardAPI.PUT("/:id", boardHandler.UpdateBoard)
-				boardAPI.DELETE("/:id", boardHandler.DeleteBoard)
-				boardAPI.GET("/:id/user-tasks", boardHandler.ListBoardByUser)
+				boardAPI.POST("", apiBoardHandler.CreateBoard)
+				boardAPI.GET("/:id", apiBoardHandler.GetBoard)
+				boardAPI.PUT("/:id", apiBoardHandler.UpdateBoard)
+				boardAPI.DELETE("/:id", apiBoardHandler.DeleteBoard)
+				boardAPI.GET("/:id/user-tasks", apiBoardHandler.ListBoardByUser)
 
-				boardAPI.POST("/:id/tasks/:task_id", boardTaskHandler.AddTaskToBoard)
-				boardAPI.DELETE("/:id/tasks/:task_id", boardTaskHandler.RemoveTaskFromBoard)
-				boardAPI.GET("/:id/tasks", boardTaskHandler.GetBoardTasks)
-				boardAPI.PATCH("/tasks/move", boardTaskHandler.MoveTasksBeetwenBoards)
+				boardAPI.POST("/:id/tasks/:task_id", apiBoardTaskHandler.AddTaskToBoard)
+				boardAPI.DELETE("/:id/tasks/:task_id", apiBoardTaskHandler.RemoveTaskFromBoard)
+				boardAPI.GET("/:id/tasks", apiBoardTaskHandler.GetBoardTasks)
+				boardAPI.PATCH("/tasks/move", apiBoardTaskHandler.MoveTasksBeetwenBoards)
 			}
 
 			taskAPI := apiProtected.Group("/tasks")
 			{
-				taskAPI.POST("", taskHandler.CreateTask)
-				taskAPI.GET("/:id", taskHandler.GetTask)
-				taskAPI.PATCH("/:id/status", taskHandler.UpdateStatus)
-				taskAPI.PUT("/:id", taskHandler.UpdateTask)
-				taskAPI.DELETE("/:id", taskHandler.DeleteTask)
-				taskAPI.GET("/user/:user_id", taskHandler.ListTaskByUser)
+				taskAPI.POST("", apiTaskHandler.CreateTask)
+				taskAPI.GET("/:id", apiTaskHandler.GetTask)
+				taskAPI.PATCH("/:id/status", apiTaskHandler.UpdateStatus)
+				taskAPI.PUT("/:id", apiTaskHandler.UpdateTask)
+				taskAPI.DELETE("/:id", apiTaskHandler.DeleteTask)
+				taskAPI.GET("/user/:user_id", apiTaskHandler.ListTaskByUser)
 			}
 		}
 	}
 
 	web := r.Group("")
 	{
-		web.POST("/login", userHandler.LoginWeb)
-		web.POST("/register", userHandler.RegisterWeb)
+		web.POST("/login", webUserHandler.LoginWeb)
+		web.POST("/register", webUserHandler.RegisterWeb)
 
 		webProtected := web.Group("")
 		webProtected.Use(jwtService.JWTAuthMiddleware())
 		{
-			webProtected.GET("/boards", boardHandler.ListBoardsPage)
-			webProtected.GET("/boards/new", boardHandler.HandleBoardForm)
-			webProtected.GET("/boards/:id", boardHandler.GetBoardPage)
-			webProtected.GET("/boards/:id/edit", boardHandler.HandleBoardForm)
-			webProtected.POST("/boards", boardHandler.HandleBoardForm)
-			webProtected.POST("/boards/:id", boardHandler.HandleBoardForm)
+			boardGroup := webProtected.Group("/boards")
+			{
+				boardGroup.GET("", webBoardHandler.ListBoardsPage)
+				boardGroup.GET("/new", webBoardHandler.HandleBoardForm)
+				boardGroup.GET("/:id", webBoardHandler.GetBoardPage)
+				boardGroup.GET("/:id/edit", webBoardHandler.HandleBoardForm)
+				boardGroup.POST("", webBoardHandler.HandleBoardForm)
+				boardGroup.POST("/:id", webBoardHandler.HandleBoardForm)
+				boardGroup.POST("/:id/delete", webBoardHandler.DeleteBoardWeb)
 
-			webProtected.GET("/tasks", taskHandler.ListTasksPage)
-			webProtected.GET("/tasks/new", taskHandler.HandleTaskForm)
-			webProtected.GET("/tasks/:id", taskHandler.GetTaskPage)
-			webProtected.GET("/tasks/:id/edit", taskHandler.HandleTaskForm)
-			webProtected.POST("/tasks", taskHandler.HandleTaskForm)
-			webProtected.POST("/tasks:id", taskHandler.HandleTaskForm)
-			webProtected.PATCH("/tasks/:id/status", taskHandler.UpdateStatus)
+				boardGroup.POST("/:id/add-task", webBoardHandler.AddTaskToBoard)
+				boardGroup.POST("/:id/create-and-add-task", webBoardHandler.CreateAndAddTaskToBoard)
+				boardGroup.POST("/:id/remove-task/:task_id", webBoardHandler.RemoveTaskFromBoard)
+			}
+
+			taskGroup := webProtected.Group("/tasks")
+			{
+				taskGroup.GET("", webTaskHandler.ListTasksPage)
+				taskGroup.GET("/new", webTaskHandler.HandleTaskForm)
+				taskGroup.GET("/:id", webTaskHandler.GetTaskPage)
+				taskGroup.GET("/:id/edit", webTaskHandler.HandleTaskForm)
+				taskGroup.POST("", webTaskHandler.HandleTaskForm)
+				taskGroup.POST("/:id", webTaskHandler.HandleTaskForm)
+				taskGroup.POST("/:id/delete", webTaskHandler.DeleteTaskWeb)
+				taskGroup.PATCH("/:id/status", apiTaskHandler.UpdateStatus)
+			}
 		}
 	}
 

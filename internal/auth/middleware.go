@@ -45,3 +45,15 @@ func (s *JWTService) JWTAuthMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+
+func MethodOverride() gin.HandlerFunc {
+    return func(c *gin.Context) {
+        if c.Request.Method == "POST" {
+            method := c.PostForm("_method")
+            if method == "PUT" || method == "PATCH" || method == "DELETE" {
+                c.Request.Method = method
+            }
+        }
+        c.Next()
+    }
+}

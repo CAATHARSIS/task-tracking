@@ -5,9 +5,8 @@ import (
 
 	"github.com/CAATHARSIS/task-tracking/internal/auth"
 	"github.com/CAATHARSIS/task-tracking/internal/config"
-	"github.com/CAATHARSIS/task-tracking/internal/handlers/board"
-	"github.com/CAATHARSIS/task-tracking/internal/handlers/task"
-	"github.com/CAATHARSIS/task-tracking/internal/handlers/user"
+	"github.com/CAATHARSIS/task-tracking/internal/handlers/api"
+	"github.com/CAATHARSIS/task-tracking/internal/handlers/web"
 	board_repo "github.com/CAATHARSIS/task-tracking/internal/repository/board"
 	board_task_repo "github.com/CAATHARSIS/task-tracking/internal/repository/board_task"
 	task_repo "github.com/CAATHARSIS/task-tracking/internal/repository/task"
@@ -38,16 +37,22 @@ func main() {
 	taskRepo := task_repo.NewTaskPostgresRepo(db)
 	userRepo := user_repo.NewUserPostgresRepo(db)
 
-	boardHandler := board.NewBoardHandler(boardRepo, boardTaskRepo, taskRepo)
-	boardTaskHandler := board.NewBoardTaskRealtionHandler(boardTaskRepo)
-	taskHandler := task.NewTaskHandler(taskRepo)
-	userHandler := user.NewUserHandler(userRepo, taskRepo)
+	apiBoardHandler := api.NewBoardHandler(boardRepo)
+	webBoardHandler := web.NewBoardHandler(boardRepo, boardTaskRepo, taskRepo)
+	apiBoardTaskHandler := api.NewBoardTaskRealtionHandler(boardTaskRepo)
+	apiTaskHandler := api.NewTaskHandler(taskRepo)
+	webTaskHandler := web.NewTaskHandler(taskRepo)
+	apiUserHandler := api.NewUserHandler(userRepo)
+	webUserHandler := web.NewUserHandler(userRepo, taskRepo)
 
 	r := router.SetupRouter(
-		boardHandler,
-		boardTaskHandler,
-		taskHandler,
-		userHandler,
+		apiBoardHandler,
+		webBoardHandler,
+		apiBoardTaskHandler,
+		apiTaskHandler,
+		webTaskHandler,
+		apiUserHandler,
+		webUserHandler,
 		jwtService,
 	)
 
